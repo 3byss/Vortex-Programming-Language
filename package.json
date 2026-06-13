@@ -1,0 +1,21 @@
+{
+  "name": "vortex-programming-language",
+  "version": "1.0.0",
+  "description": "An open source programming language created and maintained by the community members on the [Vortex chatting site](https://vtx.chat)",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3byss/Vortex-Programming-Language.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/3byss/Vortex-Programming-Language/issues"
+  },
+  "homepage": "https://github.com/3byss/Vortex-Programming-Language#readme"
+}
