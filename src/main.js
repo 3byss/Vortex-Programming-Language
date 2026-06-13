@@ -26,10 +26,15 @@ function parseLine(line) {
         let currentValue = line[i];
         if (currentValue === " ") { continue; }
 
-        if (Number(currentValue)) {
+        if (
+            parseInt(currentValue)
+            || currentValue === "0"
+            || (currentValue ===  "." && !currentNumber.includes(".")) 
+            || (currentValue == "-" && !currentNumber.includes("-"))
+        ) {
             currentNumber += currentValue;
             continue;
-        } 
+        }
         else {
             expressionList.push(currentNumber);
             currentNumber = "";
