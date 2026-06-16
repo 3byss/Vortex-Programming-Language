@@ -14,8 +14,52 @@ import fs from "node:fs";
 let fileLocation = process.argv[2];
 let fileData = fs.readFileSync(fileLocation, "utf-8").split("\n");
 
+let lines = [];
 for (const line of fileData) {
-    console.log(parseLine(line));
+    lines.push(parseLine(line));
+}
+
+for (const line of lines) {
+    let tree = parseTree(line);
+}
+
+function evaluateTree(tree) {
+    let leftSide = tree?.leftNode ? evaluateTree(tree.leftNode) : 0;
+    let rightSide = tree?.rightNode ? evaluateTree(tree.rightNode)  : 0;
+    const value = tree.value;
+
+    switch (value) {
+            case "+":
+                return leftSide + rightSide;
+            case "-":
+                return leftSide - rightSide;
+            case "*":
+                return leftSide * rightSide;
+            case "/":
+                return leftSide / rightSide;
+            default:
+                if (
+                    Number(value)
+                    || value === "0"
+                    || (value ===  "." && !value.includes(".")) 
+                    || (value == "-" && !value.includes("-") && 
+                        value.length === 0)
+                ) {
+                    return value;
+                }
+        }
+}
+
+function parseTree(line) {
+
+    // ['4', '/', '2', '*', '3', '+', '2', '-', '1']
+    let tree = {};
+
+    for (const char of line) {
+        
+    }
+
+    return tree;
 }
 
 function parseLine(line) {
@@ -27,10 +71,11 @@ function parseLine(line) {
         if (currentValue === " ") { continue; }
 
         if (
-            parseInt(currentValue)
+            Number(currentValue)
             || currentValue === "0"
             || (currentValue ===  "." && !currentNumber.includes(".")) 
-            || (currentValue == "-" && !currentNumber.includes("-"))
+            || (currentValue == "-" && !currentNumber.includes("-") && 
+                currentNumber.length === 0)
         ) {
             currentNumber += currentValue;
             continue;
@@ -61,26 +106,5 @@ function parseLine(line) {
 
     }
 
-    let value = Number(expressionList[0]);
-    for (let i = 1; i < expressionList.length - 1; i++) {
-        let expression = expressionList[i];
-        let nextValue = Number(expressionList[i + 1]);
-        
-        switch (expression) {
-            case "+":
-                value += nextValue;
-                break;
-            case "-":
-                value -= nextValue
-                break;
-            case "*":
-                value *= nextValue;
-                break;
-            case "/":
-                value /= nextValue;
-                break;
-        }
-    }
-
-    return value
+    return expressionList;
 }
