@@ -1,3 +1,4 @@
+import { TIMEOUT } from "node:dns";
 import fs from "node:fs";
 
 /* 
@@ -14,13 +15,10 @@ import fs from "node:fs";
 let fileLocation = process.argv[2];
 let fileData = fs.readFileSync(fileLocation, "utf-8").split("\n");
 
-let lines = [];
+let parsedLines = [];
 for (const line of fileData) {
-    lines.push(parseLine(line));
-}
-
-for (const line of lines) {
-    let tree = parseTree(line);
+    let parsedLine = parseLine(line);
+    console.log(evaluateTree(parseTree(parsedLine)));
 }
 
 function evaluateTree(tree) {
@@ -29,46 +27,91 @@ function evaluateTree(tree) {
     const value = tree.value;
 
     switch (value) {
-            case "+":
-                return leftSide + rightSide;
-            case "-":
-                return leftSide - rightSide;
-            case "*":
-                return leftSide * rightSide;
-            case "/":
-                return leftSide / rightSide;
-            default:
-                if (
-                    Number(value)
-                    || value === "0"
-                    || (value ===  "." && !value.includes(".")) 
-                    || (value == "-" && !value.includes("-") && 
-                        value.length === 0)
-                ) {
-                    return value;
-                }
+        case "+":
+            return Number(leftSide) + Number(rightSide);
+        case "-":
+            return Number(leftSide) - Number(rightSide);
+        case "*":
+            return Number(leftSide) * Number(rightSide);
+        case "/":
+            return Number(leftSide) / Number(rightSide);
+        default:
+            if (
+                Number(value)
+                || value === "0"
+                || (value ===  "." && !value.includes(".")) 
+                || (value == "-" && !value.includes("-") && 
+                    value.length === 0)
+            ) {
+                return value;
+            }
         }
 }
 
-function parseTree(line) {
+function parseTree(line, start = 0, end = line.length - 1, type = "") {
+    if (end - start <= 0) {
+        return {
+            value: line[start],
+            leftNode: null,
+            rightNode: null
+        }
+    }
+    
+    const priority = {
+        "+": 1,
+        "-": 2,
+        "*": 3,
+        "/": 4
+    };
 
-    // ['4', '/', '2', '*', '3', '+', '2', '-', '1']
-    let tree = {};
+    let firstOccurence = -1;
+    let lastOccurence = -1;
+    let value = line[0];
 
-    for (const char of line) {
-        
+    for (let i = start; i <= end; i++) {
+        let currentValue = line[i];
+        let bothNotNull = Boolean(priority[value])
+                          && 
+                          Boolean(priority[currentValue]);
+
+        let currentValueNotNull = !Boolean(priority[value])
+                                  &&
+                                  Boolean(priority[currentValue]);
+
+        if (currentValueNotNull) {
+            value = currentValue;
+            firstOccurence = i;
+            continue;
+        }
+
+        if (bothNotNull && priority[value] > priority[currentValue]) {
+            firstOccurence = i;
+            value = currentValue
+        } 
+
+        if (bothNotNull && priority[value] === priority[currentValue]) {
+            lastOccurence = i;
+        }
     }
 
-    return tree;
+    return {
+        value: value,
+        leftNode: parseTree(line, start, firstOccurence - 1, "left"),
+        rightNode: parseTree(line, firstOccurence + 1, end, "right")
+    }
 }
 
 function parseLine(line) {
     let expressionList = [];
     let currentNumber = line[0];
 
-    for(let i = 1; i <= line.length; i++) {
+    for (let i = 1; i <= line.length; i++) {
         let currentValue = line[i];
-        if (currentValue === " ") { continue; }
+        if (
+            currentValue === " " 
+            || currentValue === "\r"
+            || currentValue === "\n"
+        ) { continue; }
 
         if (
             Number(currentValue)
