@@ -12,29 +12,39 @@ import fs from "node:fs";
 */
 
 // https://ruslanspivak.com/lsbasi-part7/ <--- A link about abstract syntax trees
-let fileLocation = process.argv[2];
-let fileData = fs.readFileSync(fileLocation, "utf-8").split("\n");
+let sourceCode = getSourceCode();
 
-let parsedLines = [];
-for (const line of fileData) {
+for (const line of sourceCode) {
     let parsedLine = parseLine(line);
-    console.log(evaluateTree(parseTree(parsedLine)));
+    let parsedTree = parseTree(parsedLine)
+ 
+    console.log(
+        `The equation: ${line} \nis equal to: ${evaluateTree(parsedTree)}`);
+}
+
+function getSourceCode() {
+    let fileLocation = process.argv[2];
+    let fileData = fs.readFileSync(fileLocation, "utf-8").split("\n");
+
+    return fileData;
 }
 
 function evaluateTree(tree) {
-    let leftSide = tree?.leftNode ? evaluateTree(tree.leftNode) : 0;
-    let rightSide = tree?.rightNode ? evaluateTree(tree.rightNode)  : 0;
+    let leftSide = tree?.leftNode ? Number(evaluateTree(tree.leftNode)) : 0;
+    let rightSide = tree?.rightNode ? Number(evaluateTree(tree.rightNode))  : 0;
     const value = tree.value;
 
     switch (value) {
         case "+":
-            return Number(leftSide) + Number(rightSide);
+            return leftSide + rightSide;
         case "-":
-            return Number(leftSide) - Number(rightSide);
+            return leftSide - rightSide;
         case "*":
-            return Number(leftSide) * Number(rightSide);
+            return leftSide * rightSide;
         case "/":
-            return Number(leftSide) / Number(rightSide);
+            if (rightSide === 0) { throw new Error("Division by zero"); }
+
+            return leftSide / rightSide;
         default:
             if (
                 Number(value)
@@ -48,7 +58,7 @@ function evaluateTree(tree) {
         }
 }
 
-function parseTree(line, start = 0, end = line.length - 1, type = "") {
+function parseTree(line, start = 0, end = line.length - 1) {
     if (end - start <= 0) {
         return {
             value: line[start],
@@ -81,11 +91,13 @@ function parseTree(line, start = 0, end = line.length - 1, type = "") {
         if (currentValueNotNull) {
             value = currentValue;
             firstOccurence = i;
+            lastOccurence = i
             continue;
         }
 
         if (bothNotNull && priority[value] > priority[currentValue]) {
             firstOccurence = i;
+            lastOccurence = i;
             value = currentValue
         } 
 
@@ -94,10 +106,14 @@ function parseTree(line, start = 0, end = line.length - 1, type = "") {
         }
     }
 
+    if (value === "-") {
+        firstOccurence = lastOccurence;
+    }
+
     return {
         value: value,
-        leftNode: parseTree(line, start, firstOccurence - 1, "left"),
-        rightNode: parseTree(line, firstOccurence + 1, end, "right")
+        leftNode: parseTree(line, start, firstOccurence - 1),
+        rightNode: parseTree(line, firstOccurence + 1, end)
     }
 }
 
