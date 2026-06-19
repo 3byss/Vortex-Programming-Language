@@ -1,17 +1,6 @@
 import { TIMEOUT } from "node:dns";
 import fs from "node:fs";
 
-/* 
-    By adding in any txt file into the CLI arguments for the main.js file this program can do calculations using parsing techniques. However it gives faulty answers because the lack of an Abstract Syntax Tree(AST) which will be implemented next within the transpiler.
-
-    This is better used for smaller equations that utilize one operation 
-    e.g 8 + 9, 8 * 8, 3 / 1, 8 / 2.5, etc.
-    
-    But this doesnt stop it from doing larger calculations you can hand it 
-    8,000,000 * 12 or even larger as it is entirely javascript under the hood.
-*/
-
-// https://ruslanspivak.com/lsbasi-part7/ <--- A link about abstract syntax trees
 let sourceCode = getSourceCode();
 
 for (const line of sourceCode) {
